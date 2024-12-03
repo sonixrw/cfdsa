@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bggapp-deploy
+  namespace: bggns
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bggapp
+  template:
+    metadata:
+      labels:
+        app: bggapp
+    spec:
+      containers:
+        - name: bggapp
+          image: stackupiss/bgg-backend:v1
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: bggapp-config
+          env:
+            - name: BGG_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bggapp-secret
+                  key: BGG_DB_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bggapp-svc
+  namespace: bggns
+spec:
+  selector:
+    app: bggapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: LoadBalancer
