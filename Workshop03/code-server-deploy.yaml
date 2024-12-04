@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: code-server
+  name: code-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: code-server
+  template:
+    metadata:
+      labels:
+        app: code-server
+    spec:
+      containers:
+      - name: code-server
+        image: linuxserver/code-server:amd64-4.95.3
+        ports:
+        - containerPort: 8443
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: code-server-config
+              key: TZ
+        - name: DEFAULT_WORKSPACE
+          valueFrom:
+            configMapKeyRef:
+              name: code-server-config
+              key: DEFAULT_WORKSPACE
+        - name: PROXY_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: code-server-config
+              key: PROXY_DOMAIN
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: code-server-secret
+              key: PASSWORD
+        - name: SUDO_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: code-server-secret
+              key: SUDO_PASSWORD
+        volumeMounts:
+        - mountPath: /config/workspace
+          name: code-server-storage
+      volumes:
+      - name: code-server-storage
+        persistentVolumeClaim:
+          claimName: code-server-pvc
+

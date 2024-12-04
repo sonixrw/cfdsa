@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: code-server 
+  name: code-server-config
+data:
+  TZ: Asia/Singapore
+  PROXY_DOMAIN: code-146.190.6.99.nip.io
+  DEFAULT_WORKSPACE: /config/workspace
